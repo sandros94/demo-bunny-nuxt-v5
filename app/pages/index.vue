@@ -1,19 +1,12 @@
 <template>
   <div>
     <UPageHero
-      title="Vue Starter Template"
-      description="A production-ready starter template powered by Nuxt UI. Build beautiful, accessible, and performant applications in minutes, not hours."
+      title="demo-bunny-nuxt-v5"
+      description="A demo of a SSR Nuxt application on Bunny.net Edge Scripting."
       :links="[
         {
-          label: 'Get started',
-          to: 'https://ui.nuxt.com/docs/getting-started/installation/vue',
-          target: '_blank',
-          trailingIcon: 'i-lucide-arrow-right',
-          size: 'xl',
-        },
-        {
-          label: 'Use this template',
-          to: 'https://github.com/nuxt-ui-templates/starter-vue',
+          label: 'View on GitHub',
+          to: 'https://github.com/sandros94/demo-bunny-nuxt-v5',
           target: '_blank',
           icon: 'i-lucide-github',
           size: 'xl',
@@ -32,73 +25,48 @@
     </UContainer>
 
     <UPageSection
-      id="features"
-      title="Everything you need to build modern Vue apps"
-      description="Start with a solid foundation. This template includes all the essentials for building production-ready applications with Nuxt UI's powerful component system."
+      id="stack"
+      title="The Stack"
+      description="Built entirely on nightly and beta releases — living on the edge, literally."
       :features="[
         {
-          icon: 'i-lucide-rocket',
-          title: 'Production-ready from day one',
+          icon: 'i-lucide-layers',
+          title: 'Nuxt v5 (nightly)',
           description:
-            'Pre-configured with TypeScript, ESLint, Tailwind CSS, and Vite. Focus on building features, not setting up tooling.',
+            'The next major version of Nuxt, still in nightly builds. Brings a leaner core, improved performance, and tighter integration with the modern Vite ecosystem.',
         },
         {
-          icon: 'i-lucide-palette',
-          title: 'Beautiful by default',
+          icon: 'i-lucide-server',
+          title: 'Nitro v3 (beta)',
           description:
-            'Powered by Nuxt UI\'s design system with automatic dark mode, consistent spacing, and polished components that look great out of the box.',
+            'The server engine powering the SSR runtime. v3 beta introduces a redesigned core built on top of H3 v2 and srvx for runtime-agnostic deployments.',
         },
         {
           icon: 'i-lucide-zap',
-          title: 'Lightning fast',
+          title: 'Vite v8 + Rolldown',
           description:
-            'Optimized with Vite\'s blazing fast HMR, automatic code splitting, and tree-shaking. Your users will love the speed.',
+            'Vite v8 ships with Rolldown as the bundler — a Rust-powered Rollup-compatible bundler that dramatically improves build speed and consistency between dev and prod.',
         },
         {
-          icon: 'i-lucide-blocks',
-          title: '100+ components included',
+          icon: 'i-lucide-wrench',
+          title: 'Vite+',
           description:
-            'Access Nuxt UI\'s comprehensive component library. From forms to navigation, everything is accessible, responsive, and customizable.',
+            'A unified toolchain wrapping Vite, Vitest, Oxlint, and Oxfmt under a single `vp` CLI. Handles lint, format, type-check, and commit hooks without extra configuration.',
         },
         {
-          icon: 'i-lucide-code-2',
-          title: 'Developer experience first',
+          icon: 'i-lucide-globe',
+          title: 'Bunny.net Edge Scripting',
           description:
-            'Auto-imports, hot module replacement, TypeScript support, and Vue DevTools integration. Write less boilerplate and ship more features.',
+            'Deployed as a fully server-side rendered application on Bunny.net\'s Edge Scripting runtime — a Deno-based edge platform distributed globally.',
         },
         {
-          icon: 'i-lucide-shield-check',
-          title: 'Built for scale',
+          icon: 'i-lucide-palette',
+          title: 'Nuxt UI',
           description:
-            'Modern Vue 3 architecture with Composition API, proper error handling, and security best practices built-in.',
+            'Components, layouts, and design system from Nuxt UI — providing accessible, themeable building blocks on top of Tailwind CSS v4.',
         },
       ]"
     />
-
-    <UPageSection>
-      <UPageCTA
-        title="Ready to build your next Vue app?"
-        description="Join thousands of developers building with Vue and Nuxt UI. Get this template and start shipping today."
-        variant="subtle"
-        :links="[
-          {
-            label: 'Start building',
-            to: 'https://ui.nuxt.com/docs/getting-started/installation/vue',
-            target: '_blank',
-            trailingIcon: 'i-lucide-arrow-right',
-            color: 'neutral',
-          },
-          {
-            label: 'View on GitHub',
-            to: 'https://github.com/nuxt-ui-templates/starter-vue',
-            target: '_blank',
-            icon: 'i-lucide-github',
-            color: 'neutral',
-            variant: 'outline',
-          },
-        ]"
-      />
-    </UPageSection>
   </div>
 </template>
 
