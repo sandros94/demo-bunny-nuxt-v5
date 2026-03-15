@@ -1,0 +1,39 @@
+name: Deploy when pushing on main
+
+on:
+  push:
+    branches:
+      - 'main'
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    name: 'Upload script'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Enable Corepack
+        run: npm i -g --force corepack && corepack enable
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with: { node-version: lts/*, cache: pnpm }
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Lint project
+        run: pnpm lint
+
+      - name: Build project
+        run: pnpm build
+
+      - name: Deploy Script to Bunny Edge Scripting
+        uses: BunnyWay/actions/deploy-script@main
+        with:
+          script_id: ${{ secrets.SCRIPT_ID }}
+          deploy_key: ${{ secrets.DEPLOY_KEY }}
+          file: '.output/index.mjs'

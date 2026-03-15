@@ -1,0 +1,51 @@
+diff --git a/dist/runtime/server/api.js b/dist/runtime/server/api.js
+index 042c65fc79910f0da5a90543e80e44a7f13c3a63..3f64a051e92b8cf3debdf37555c6afd4e673703a 100644
+--- a/dist/runtime/server/api.js
++++ b/dist/runtime/server/api.js
+@@ -1,16 +1,17 @@
+ import { basename } from "pathe";
+ import { getIcons } from "@iconify/utils";
+ import { hash } from "ohash";
+-import { createError, getQuery } from "h3";
++import { HTTPError, getRequestURL, getQuery } from "nitro/h3";
++import { defineCachedHandler } from "nitro/cache";
+ import { consola } from "consola";
+-import { useAppConfig, getRequestURL, defineCachedEventHandler } from "#imports";
++import { useAppConfig } from "#imports";
+ import { collections } from "#nuxt-icon-server-bundle";
+ const warnOnceSet = /* @__PURE__ */ new Set();
+ const DEFAULT_ENDPOINT = "https://api.iconify.design";
+-export default defineCachedEventHandler(async (event) => {
++export default defineCachedHandler(async (event) => {
+   const url = getRequestURL(event);
+   if (!url)
+-    return createError({ status: 400, message: "Invalid icon request" });
++    return new HTTPError({ status: 400, message: "Invalid icon request" });
+   const options = useAppConfig().icon;
+   const collectionName = event.context.params?.collection?.replace(/\.json$/, "");
+   const collection = collectionName ? await collections[collectionName]?.() : null;
+@@ -38,7 +39,7 @@ export default defineCachedEventHandler(async (event) => {
+     const apiUrl = new URL("./" + basename(url.pathname) + url.search, apiEndPoint);
+     consola.debug(`[Icon] fetching ${(icons || []).map((i) => "`" + collectionName + ":" + i + "`").join(",")} from iconify api`);
+     if (apiUrl.host !== new URL(apiEndPoint).host) {
+-      return createError({ status: 400, message: "Invalid icon request" });
++      return new HTTPError({ status: 400, message: "Invalid icon request" });
+     }
+     try {
+       const data = await $fetch(apiUrl.href);
+@@ -46,12 +47,12 @@ export default defineCachedEventHandler(async (event) => {
+     } catch (e) {
+       consola.error(e);
+       if (e.status === 404)
+-        return createError({ status: 404 });
++        return new HTTPError({ status: 404 });
+       else
+-        return createError({ status: 500, message: "Failed to fetch fallback icon" });
++        return new HTTPError({ status: 500, message: "Failed to fetch fallback icon" });
+     }
+   }
+-  return createError({ status: 404 });
++  return new HTTPError({ status: 404 });
+ }, {
+   group: "nuxt",
+   name: "icon",
