@@ -10,5 +10,9 @@ export default defineNuxtConfig({
     serverDir: './server',
     imports: {},
     preset: './preset/bunny.ts',
+
+    replace: {
+      'from "consola"': 'from "consola/browser"',
+    },
   },
 })
