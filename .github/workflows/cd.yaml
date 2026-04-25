@@ -36,4 +36,4 @@ jobs:
         with:
           script_id: ${{ secrets.SCRIPT_ID }}
           deploy_key: ${{ secrets.DEPLOY_KEY }}
-          file: '.output/index.mjs'
+          file: '.output/bunny-edge-scripting.mjs'

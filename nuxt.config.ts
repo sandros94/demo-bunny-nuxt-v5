@@ -9,7 +9,7 @@ export default defineNuxtConfig({
   nitro: {
     serverDir: './server',
     imports: {},
-    preset: './preset/bunny.ts',
+    preset: 'bunny',
 
     replace: {
       'from "consola"': 'from "consola/browser"',

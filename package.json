@@ -12,33 +12,31 @@
     "postinstall": "nuxt prepare && vp config"
   },
   "devDependencies": {
-    "@comark/nuxt": "https://pkg.pr.new/comarkdown/comark/@comark/nuxt@e5d3204",
-    "@iconify-json/lucide": "^1.2.98",
-    "@nuxt/ui": "https://pkg.pr.new/@nuxt/ui@e971a15",
-    "@types/node": "^25.5.0",
-    "@typescript/native-preview": "npm:@typescript/native-preview@7.0.0-dev.20260315.1",
-    "defu": "^6.1.4",
-    "h3": "2.0.1-rc.16",
-    "nitro": "3.0.260311-beta",
+    "@comark/nuxt": "^0.3.1",
+    "@iconify-json/lucide": "^1.2.103",
+    "@nuxt/ui": "npm:@nuxt/ui@4.7.0",
+    "@types/node": "^25.6.0",
+    "@typescript/native-preview": "npm:@typescript/native-preview@7.0.0-dev.20260421.2",
+    "defu": "^6.1.7",
+    "h3": "2.0.1-rc.20",
+    "nitro": "https://pkg.pr.new/nitro@fbd3edc",
     "nuxt": "npm:nuxt-nightly@5.0.0-29558834.5284bce6",
-    "srvx": "npm:srvx@^0.11.9",
-    "tailwindcss": "npm:tailwindcss@^4.2.1",
-    "typescript": "npm:typescript@^5.9.3",
-    "vite": "npm:@voidzero-dev/vite-plus-core@0.1.11",
-    "vite-plus": "npm:vite-plus@0.1.11",
-    "vitest": "npm:@voidzero-dev/vite-plus-test@0.1.11",
-    "vue": "npm:vue@^3.5.30",
-    "vue-router": "npm:vue-router@^5.0.3",
-    "vue-tsc": "npm:vue-tsc@^3.2.5",
+    "tailwindcss": "npm:tailwindcss@^4.2.4",
+    "typescript": "npm:typescript@^6.0.3",
+    "vite": "npm:@voidzero-dev/vite-plus-core@0.1.17",
+    "vite-plus": "npm:vite-plus@0.1.17",
+    "vitest": "npm:@voidzero-dev/vite-plus-test@0.1.17",
+    "vue": "npm:vue@^3.5.33",
+    "vue-router": "npm:vue-router@^5.0.6",
+    "vue-tsc": "npm:vue-tsc@^3.2.7",
     "vue-tsgo": "npm:vue-tsgo@^0.1.1"
   },
-  "packageManager": "pnpm@10.32.1",
+  "packageManager": "pnpm@10.33.1",
   "pnpm": {
     "overrides": {
-      "nitro": "npm:nitro@3.0.260311-beta",
-      "nuxt": "npm:nuxt-nightly@5.0.0-29558834.5284bce6",
-      "vite": "npm:@voidzero-dev/vite-plus-core@0.1.11",
-      "vitest": "npm:@voidzero-dev/vite-plus-test@0.1.11"
+      "nitro": "https://pkg.pr.new/nitro@fbd3edc",
+      "vite": "npm:@voidzero-dev/vite-plus-core@0.1.17",
+      "vitest": "npm:@voidzero-dev/vite-plus-test@0.1.17"
     },
     "patchedDependencies": {
       "@nuxt/icon@2.2.1": ".patches/@nuxt__icon@2.2.1.patch"
