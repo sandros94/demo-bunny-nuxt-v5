@@ -6,10 +6,21 @@ export default defineNuxtConfig({
 
   // ssr: false,
 
+  vite: {
+    optimizeDeps: {
+      include: [
+        '@nuxt/ui > prosemirror-state',
+        '@nuxt/ui > prosemirror-transform',
+        '@nuxt/ui > prosemirror-model',
+        '@nuxt/ui > prosemirror-view',
+        '@nuxt/ui > prosemirror-gapcursor',
+      ],
+    },
+  },
+
   nitro: {
     serverDir: './server',
     imports: {},
-    preset: 'bunny',
 
     replace: {
       'from "consola"': 'from "consola/browser"',
