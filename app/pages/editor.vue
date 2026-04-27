@@ -106,7 +106,9 @@ const Alert = defineComarkVueComponent({
 
 const components = [Alert]
 
-// localStorage persistence — read on mount, save on every edit.
+// localStorage persistence — load on mount, save on every change.
+// `v-model:ast` keeps `tree` in sync with the editor; the watcher below
+// is just the persistence side-effect.
 if (import.meta.client) {
   onMounted(() => {
     const saved = localStorage.getItem(STORAGE_KEY)
@@ -117,18 +119,18 @@ if (import.meta.client) {
         // ignore corrupt storage
       }
     }
-    watch(
-      tree,
-      (t) => {
-        try {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(t))
-        } catch {
-          // quota / private mode — ignore
-        }
-      },
-      { deep: true },
-    )
   })
+  watch(
+    tree,
+    (t) => {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(t))
+      } catch {
+        // quota / private mode — ignore
+      }
+    },
+    { deep: true },
+  )
 }
 
 async function resetToSeed() {

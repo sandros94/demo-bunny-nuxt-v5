@@ -9,11 +9,14 @@
  *      `::alert` / `:badge` style components.
  */
 
+// @ts-ignore
 export { default as ComarkEditor } from './ComarkEditor.vue'
 
 export {
   useComarkEditor,
-  type ComarkEditorContentType,
+  type AsyncSetterInput,
+  type SetterContext,
+  type SetterInput,
   type UseComarkEditorOptions,
   type UseComarkEditorReturn,
 } from './use-comark-editor'
