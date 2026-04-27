@@ -20,6 +20,18 @@ export default defineConfig({
           testTimeout: 30_000,
         },
       },
+      {
+        // The tiptap-comark library — sidecar tests live next to each
+        // extension in `lib/tiptap-comark/src/**/*.test.ts`.
+        test: {
+          name: 'tiptap-comark',
+          include: ['lib/tiptap-comark/src/**/*.{test,spec}.ts'],
+          environment: 'node',
+          maxConcurrency: 8,
+          hookTimeout: 30_000,
+          testTimeout: 30_000,
+        },
+      },
       await defineVitestProject({
         test: {
           name: 'nuxt',

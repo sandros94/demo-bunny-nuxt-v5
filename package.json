@@ -13,7 +13,8 @@
     "test": "vp test",
     "test:unit": "vp test --project unit",
     "test:e2e": "vp test --project e2e",
-    "test:nuxt": "vp test --project nuxt"
+    "test:nuxt": "vp test --project nuxt",
+    "test:lib": "vp test --project tiptap-comark"
   },
   "devDependencies": {
     "@comark/nuxt": "^0.3.1",

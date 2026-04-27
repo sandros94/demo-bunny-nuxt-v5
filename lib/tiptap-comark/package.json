@@ -1,0 +1,26 @@
+{
+  "name": "tiptap-comark",
+  "version": "0.0.0",
+  "private": true,
+  "description": "ComarkKit — a complete Tiptap editor schema for Comark documents. Edit markdown or AST directly; round-trip is lossless because the schema mirrors Comark exactly.",
+  "keywords": [
+    "comark",
+    "editor",
+    "markdown",
+    "prosemirror",
+    "tiptap"
+  ],
+  "files": [
+    "src"
+  ],
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "peerDependencies": {
+    "@tiptap/core": "^3.0.0",
+    "comark": "^0.3.0"
+  }
+}
