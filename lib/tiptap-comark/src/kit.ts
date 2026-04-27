@@ -21,6 +21,8 @@
  */
 
 import type { Extensions } from '@tiptap/core'
+import Document from '@tiptap/extension-document'
+import Text from '@tiptap/extension-text'
 import { ComarkBold, boldSpec } from './marks/bold'
 import { ComarkCode, codeSpec } from './marks/code'
 import { ComarkItalic, italicSpec } from './marks/italic'
@@ -60,6 +62,12 @@ export const ComarkKit: Extensions = [
   // Core orchestrator first so its storage is initialised before any
   // extension's onCreate fires (not strictly necessary, but predictable).
   ComarkSerializer,
+
+  // PM schema essentials — every editor needs the doc and text node specs.
+  // We pull them straight from Tiptap rather than reinvent: they're tiny,
+  // stable, and have no Comark-specific behavior.
+  Document,
+  Text,
 
   // Block nodes
   ComarkParagraph,

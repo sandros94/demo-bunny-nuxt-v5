@@ -1,36 +1,29 @@
 <!--
   AlertNodeView.vue
   ----------------------------------------------------------------------------
-  In-editor rendering for a Comark `::alert` block component, paired with the
-  `ComarkComponentDefinition` registered in `tiptap-comark-nuxt.ts`.
+  In-editor rendering for a Comark `::alert` block component, paired with
+  `defineComarkVueComponent({ name: 'alert', ... })`.
+
+  Under the new ComarkKit architecture, declared component props are
+  first-class native PM attrs (no `comarkProps` carrier). For our alert:
+  `type` and `title` ride directly on `node.attrs.type` / `node.attrs.title`.
 
   Responsibilities:
     - Render the alert visually using Nuxt UI tokens
     - Expose an editable slot via <NodeViewContent /> for the alert body
-    - Edit `comarkProps` through a <UForm> inside a <UPopover>
-
-  The form state is kept in a local reactive object that mirrors
-  `node.attrs.comarkProps`. External changes (undo/redo, programmatic
-  updates, v-model roundtrips) flow back through a watcher. Form submission
-  calls `updateAttributes({ comarkProps: ... })` which is what drives the
-  persistence loop back to the Comark AST.
+    - Edit props through a <UForm> inside a <UPopover>; submission calls
+      `updateAttributes({ type, title })` directly on the node.
 -->
 
 <script setup lang="ts">
 import { computed, reactive, watch } from 'vue'
 import { NodeViewWrapper, NodeViewContent, type NodeViewProps } from '@tiptap/vue-3'
 import type { SelectItem } from '@nuxt/ui'
-import * as v from 'valibot'
 
-// Must match the schema declared on the registry entry. Exporting this from
-// a shared module and importing here would prevent drift, but inlined for
-// the example so the file stands alone.
-const schema = v.object({
-  type: v.optional(v.pipe(v.picklist(['info', 'warning', 'success', 'error'])), 'info'),
-  title: v.optional(v.string()),
-})
-
-type AlertProps = v.InferInput<typeof schema>
+interface AlertProps {
+  type: 'info' | 'warning' | 'success' | 'error'
+  title: string
+}
 
 const props = defineProps<NodeViewProps>()
 
@@ -39,31 +32,28 @@ const props = defineProps<NodeViewProps>()
 const state = reactive<AlertProps>(readPropsFromNode())
 
 function readPropsFromNode(): AlertProps {
-  const raw = (props.node.attrs.comarkProps ?? {}) as Partial<AlertProps>
+  const attrs = props.node.attrs as Partial<AlertProps>
   return {
-    type: raw.type ?? 'info',
-    title: raw.title ?? '',
+    type: attrs.type ?? 'info',
+    title: attrs.title ?? '',
   }
 }
 
 watch(
-  () => props.node.attrs.comarkProps,
+  () => [props.node.attrs.type, props.node.attrs.title],
   () => {
     const next = readPropsFromNode()
     // Avoid thrashing if nothing actually changed
     if (state.type !== next.type) state.type = next.type
     if (state.title !== next.title) state.title = next.title
   },
-  { deep: true },
 )
 
 function onSubmit() {
+  // Drop empty title so the Comark AST stays clean
   props.updateAttributes({
-    comarkProps: {
-      type: state.type,
-      // Drop empty title so the Comark AST stays clean
-      ...(state.title ? { title: state.title } : {}),
-    },
+    type: state.type,
+    title: state.title ? state.title : null,
   })
 }
 
@@ -138,7 +128,7 @@ const typeItems = [
       />
 
       <template #content>
-        <UForm :schema="schema" :state="state" class="space-y-3" @submit="onSubmit">
+        <UForm :state="state" class="space-y-3" @submit="onSubmit">
           <UFormField label="Type" name="type" required>
             <USelectMenu v-model="state.type" :items="typeItems" value-key="value" class="w-full" />
           </UFormField>

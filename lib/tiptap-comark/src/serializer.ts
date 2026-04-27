@@ -324,6 +324,11 @@ export interface ComarkSerializerStorage {
   /** External frontmatter / meta the editor doesn't own. */
   frontmatter: Record<string, unknown>
   meta: Record<string, unknown>
+  /**
+   * Editor instance, populated on `onCreate`. Internal — use `getAst` /
+   * `getMarkdown` rather than reaching into this directly.
+   */
+  editor: Editor | null
   /** Read the editor's current content as a Comark AST. */
   getAst(): ComarkTree
   /** Read the editor's current content as Comark markdown. */
@@ -334,30 +339,31 @@ export const ComarkSerializer = Extension.create({
   name: 'comark',
 
   addStorage(): ComarkSerializerStorage {
-    const editorRef = { editor: null as Editor | null }
     return {
       helpers: null,
       frontmatter: {},
       meta: {},
-      getAst() {
-        const editor = editorRef.editor
-        if (!editor) throw new Error('[comark] editor not yet attached')
-        const helpers = ensureHelpers(editor)
-        return pmDocToComark(editor.getJSON() as JSONContent, helpers, {
+      editor: null,
+      getAst(this: ComarkSerializerStorage): ComarkTree {
+        if (!this.editor) throw new Error('[comark] editor not yet attached')
+        const helpers = ensureHelpers(this.editor)
+        return pmDocToComark(this.editor.getJSON() as JSONContent, helpers, {
           frontmatter: this.frontmatter,
           meta: this.meta,
         })
       },
-      async getMarkdown() {
+      async getMarkdown(this: ComarkSerializerStorage): Promise<string> {
         const tree = this.getAst()
         return await renderMarkdown(tree)
       },
-    } as ComarkSerializerStorage & { _editorRef?: { editor: Editor | null } }
+    }
   },
 
-  onCreate() {
-    // Cache the editor so storage methods can reach it without `this.editor`.
-    ;(this.storage as ComarkSerializerStorage & { _editor?: Editor })._editor = this.editor
+  onBeforeCreate() {
+    // Stash the editor on storage as early as possible — `setComarkAst`
+    // fired from a host's `onCreate` callback dispatches a transaction
+    // before our extension's own `onCreate` would run, so we set up here.
+    this.storage.editor = this.editor
   },
 
   addCommands() {

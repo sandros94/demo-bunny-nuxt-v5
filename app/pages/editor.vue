@@ -8,20 +8,20 @@
   - The editor itself is `<ClientOnly>` because Tiptap's view layer needs a
     DOM. The Comark AST debug pane below it IS rendered on the server, so
     the e2e test can verify the seed parses correctly without a browser.
+  - Wired through `tiptap-comark-vue` — the new ComarkKit-based stack. The
+    custom alert is registered via `defineComarkVueComponent`; the form
+    inside `AlertNodeView.vue` writes back to first-class PM attrs (no
+    `comarkProps` carrier).
 -->
 
 <script setup lang="ts">
 import { onMounted, watch } from 'vue'
 import { parse } from 'comark'
-import * as v from 'valibot'
-import { createComarkComponentRegistry, useComarkEditor } from '~/composables/tiptap-comark-nuxt'
-import type { ComarkTree } from '~/utils/tiptap-comark'
+import { ComarkEditor, defineComarkVueComponent, type ComarkTree } from 'tiptap-comark-vue'
 import AlertNodeView from '~/components/AlertNodeView.vue'
 
 const STORAGE_KEY = 'comark-demo-doc'
 
-// Seed exercised by the e2e test — every feature the converter claims to
-// support should appear at least once below.
 const SEED_MARKDOWN = `---
 title: Comark Editor Demo
 author: Demo
@@ -76,38 +76,37 @@ const greet = (name: string) => {
 That's the demo.
 `
 
-// SSR-shared state — `useState` guarantees the parsed seed survives the
-// hydration boundary without re-parsing on the client.
+// SSR-shared state — `useState` survives the hydration boundary so the
+// client doesn't re-parse the seed.
 const tree = useState<ComarkTree>('comark-demo-tree', () => ({
   nodes: [],
   frontmatter: {},
   meta: {},
 }))
 
-// Parse the seed once. `useAsyncData` runs server-side and serializes the
-// result so the client doesn't re-parse on hydration.
 const { data: seed } = await useAsyncData('comark-demo-seed', () => parse(SEED_MARKDOWN))
 
 if (seed.value && tree.value.nodes.length === 0) {
   tree.value = seed.value as ComarkTree
 }
 
-const registry = createComarkComponentRegistry([
-  {
-    name: 'alert',
-    kind: 'block',
-    schema: v.object({
-      type: v.optional(v.picklist(['info', 'warning', 'success', 'error']), 'info'),
-      title: v.optional(v.string()),
-    }),
-    nodeView: AlertNodeView,
+// Custom Alert component — `type` and `title` become first-class native PM
+// attrs on the schema. The Vue NodeView in `AlertNodeView.vue` reads them
+// from `node.attrs.type` / `node.attrs.title` and writes back via
+// `updateAttributes({ type, title })`.
+const Alert = defineComarkVueComponent({
+  name: 'alert',
+  kind: 'block',
+  props: {
+    type: { type: 'string', default: 'info' },
+    title: { type: 'string' },
   },
-])
+  nodeView: AlertNodeView,
+})
 
-const { model, extensions, handlers } = useComarkEditor(tree, { registry })
+const components = [Alert]
 
-// Browser persistence — load on mount, save on change. Wrapped in
-// `import.meta.client` because `localStorage` is undefined on the server.
+// localStorage persistence — read on mount, save on every edit.
 if (import.meta.client) {
   onMounted(() => {
     const saved = localStorage.getItem(STORAGE_KEY)
@@ -148,12 +147,10 @@ async function resetToSeed() {
     </header>
 
     <ClientOnly>
-      <UEditor
-        v-model="model"
-        content-type="json"
-        :extensions="extensions"
-        :handlers="handlers"
-        class="border border-default rounded-lg"
+      <ComarkEditor
+        v-model:ast="tree"
+        :components="components"
+        class="prose dark:prose-invert max-w-none rounded-lg border border-default p-4 min-h-100 focus:outline-none"
         data-test="editor"
       />
       <template #fallback>

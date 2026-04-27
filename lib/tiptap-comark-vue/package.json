@@ -1,14 +1,15 @@
 {
-  "name": "tiptap-comark",
+  "name": "tiptap-comark-vue",
   "version": "0.0.0",
   "private": true,
-  "description": "ComarkKit — a complete Tiptap editor schema for Comark documents. Edit markdown or AST directly; round-trip is lossless because the schema mirrors Comark exactly.",
+  "description": "Vue 3 bindings for tiptap-comark — `<ComarkEditor>`, `useComarkEditor`, and Vue NodeView helpers. No Nuxt UI dependency.",
   "keywords": [
     "comark",
     "editor",
     "markdown",
     "prosemirror",
-    "tiptap"
+    "tiptap",
+    "vue"
   ],
   "files": [
     "src"
@@ -21,8 +22,9 @@
   },
   "peerDependencies": {
     "@tiptap/core": "^3.22.4",
-    "@tiptap/extension-document": "^3.22.4",
-    "@tiptap/extension-text": "^3.22.4",
-    "comark": "^0.3.1"
+    "@tiptap/vue-3": "^3.22.4",
+    "comark": "^0.3.1",
+    "tiptap-comark": "workspace:*",
+    "vue": "^3.5.33"
   }
 }
