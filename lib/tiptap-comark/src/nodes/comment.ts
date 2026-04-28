@@ -56,10 +56,17 @@ export const ComarkComment = Node.create({
 
   addAttributes() {
     return {
+      // `data-comark-comment` doubles as both the marker (so `parseHTML`'s
+      // attribute selector matches) and the payload — emitting it
+      // unconditionally avoids the previous bug where the node-level
+      // `renderHTML` overwrote a non-empty payload with an empty marker
+      // string via `mergeAttributes` last-wins semantics.
       text: {
         default: '',
         parseHTML: (el) => el.getAttribute('data-comark-comment') ?? '',
-        renderHTML: (attrs) => (attrs.text ? { 'data-comark-comment': attrs.text as string } : {}),
+        renderHTML: (attrs) => ({
+          'data-comark-comment': typeof attrs.text === 'string' ? attrs.text : '',
+        }),
       },
       ...htmlAttrSpec({ reserved: SEMANTIC_KEYS as unknown as string[] }),
     }
@@ -70,7 +77,7 @@ export const ComarkComment = Node.create({
   },
 
   renderHTML({ HTMLAttributes }) {
-    return ['div', mergeAttributes(HTMLAttributes, { 'data-comark-comment': '' })]
+    return ['div', mergeAttributes(HTMLAttributes)]
   },
 
   addStorage() {

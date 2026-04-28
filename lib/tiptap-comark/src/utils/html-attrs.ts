@@ -65,7 +65,12 @@ export function htmlAttrSpec(options: HtmlAttrSpecOptions = {}): Attributes {
   const reserved = new Set(options.reserved ?? [])
   return {
     htmlAttrs: {
-      default: {} as Record<string, string>,
+      // Default to an empty record so consumers can read `htmlAttrs` as a
+      // `Record<string, unknown>` without needing a null check. The bag
+      // accepts any primitive — strings, numbers, booleans, bigints — and
+      // `renderHTML` stringifies them; non-primitives are dropped to avoid
+      // emitting `[object Object]` as an HTML attribute.
+      default: {} as Record<string, unknown>,
       parseHTML: (el: HTMLElement) => {
         const out: Record<string, string> = {}
         for (const attr of Array.from(el.attributes)) {

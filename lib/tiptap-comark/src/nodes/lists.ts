@@ -14,7 +14,7 @@
 import { Node, mergeAttributes } from '@tiptap/core'
 import { mergeAttrs, splitAttrs } from '../utils/attrs'
 import { htmlAttrSpec } from '../utils/html-attrs'
-import type { ComarkElement, ComarkHelpers, ComarkNode, JSONContent, NodeSpec } from '../types'
+import type { ComarkElement, ComarkHelpers, JSONContent, NodeSpec } from '../types'
 
 // ---------------------------------------------------------------------------
 // listItem
@@ -59,60 +59,19 @@ export const listItemSpec: NodeSpec = {
     const [, rawAttrs, ...children] = el
     const { htmlAttrs } = splitAttrs(rawAttrs, [])
 
-    // li children are mixed inline/block — bucket them. Consecutive inline
-    // runs go into a single paragraph; block children pass through.
-    const content = bucketMixed(children, h)
+    // `<li>` children are mixed inline/block. The orchestrator's
+    // `parseBlocks` already buckets consecutive inline runs (text, marks,
+    // inline-context nodes — including user-defined inline components)
+    // into paragraphs and passes block elements through. Delegating keeps
+    // a single source of truth for "what's inline" rather than duplicating
+    // the rule with a hardcoded `br | img` set.
+    const content = h.parseBlocks(children)
     if (content.length === 0) content.push({ type: 'paragraph' })
 
     const out: JSONContent = { type: 'listItem', content }
     if (Object.keys(htmlAttrs).length > 0) out.attrs = { htmlAttrs }
     return out
   },
-}
-
-/**
- * Group a mixed inline/block child list into PM block content. Consecutive
- * inline-only children become one paragraph.
- */
-function bucketMixed(children: ComarkNode[], h: ComarkHelpers): JSONContent[] {
-  const out: JSONContent[] = []
-  let inlineBuf: ComarkNode[] = []
-
-  const flush = () => {
-    if (inlineBuf.length === 0) return
-    const inlines = h.parseInlines(inlineBuf)
-    if (inlines.length > 0) out.push({ type: 'paragraph', content: inlines })
-    inlineBuf = []
-  }
-
-  for (const child of children) {
-    if (typeof child === 'string') {
-      inlineBuf.push(child)
-      continue
-    }
-    if (!Array.isArray(child)) continue
-    // Comments are dropped at this layer.
-    if (child[0] === null) continue
-    const tag = child[0]
-    // Inline-only tags go into the buffer; everything else is treated as
-    // a block. Picking based on the orchestrator's mark/node specs would
-    // be cleaner, but the small fixed set here covers Comark's emission.
-    if (isInlineTag(tag, h)) {
-      inlineBuf.push(child)
-    } else {
-      flush()
-      out.push(...h.parseBlocks([child]))
-    }
-  }
-  flush()
-  return out
-}
-
-function isInlineTag(tag: string, h: ComarkHelpers): boolean {
-  if (h.markSpecs.some((m) => (m.tags as readonly string[]).includes(tag))) return true
-  // br, img, and registered inline components are nodes but inline.
-  if (tag === 'br' || tag === 'img') return true
-  return false
 }
 
 export const ComarkListItem = Node.create({
