@@ -22,14 +22,14 @@
  * setters to push new content after the fact.
  */
 
-import { Editor, type AnyExtension, type Content, type EditorOptions } from '@tiptap/core'
+import type { AnyExtension, Content, EditorOptions } from '@tiptap/core'
+import { Editor } from '@tiptap/vue-3'
 import { ComarkKit, type ComarkTree, type JSONContent } from 'tiptap-comark'
 import {
   computed,
   onBeforeUnmount,
   onMounted,
   shallowRef,
-  triggerRef,
   type ComputedRef,
   type ShallowRef,
 } from 'vue'
@@ -137,13 +137,10 @@ export function useComarkEditor(options: UseComarkEditorOptions = {}): UseComark
         if (isComarkTreeLike(initial)) {
           e.commands.setComarkAst(initial as ComarkTree)
         }
-        onCreate?.(e)
+        onCreate?.(e as Editor)
       },
       onUpdate({ editor: e }) {
-        onUpdate?.(e)
-        // Tiptap mutates the editor in place; nudge Vue to re-evaluate
-        // anything depending on `editor.value`.
-        triggerRef(editor)
+        onUpdate?.(e as Editor)
       },
       onDestroy() {
         onDestroy?.()

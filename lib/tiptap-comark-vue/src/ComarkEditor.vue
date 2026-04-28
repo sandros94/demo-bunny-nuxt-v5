@@ -17,14 +17,21 @@
      are not active in this mode — drive the editor via your own
      composable result.
 
+  The `editor` prop and the slot/expose use `@tiptap/vue-3`'s `Editor`
+  class everywhere so it lines up with `EditorContent`'s expected prop
+  type without any structural casting. Consumers building their own
+  editor outside `useComarkEditor` should also construct a vue-3 `Editor`
+  (the kit, components, and serializer are all framework-agnostic — only
+  the host that mounts a NodeView needs vue-3).
+
   Components and extensions are read once at mount (the composable's
   schema is stamped at construction). To swap them, re-key the parent.
 -->
 
 <script setup lang="ts">
 import { computed, watch } from 'vue'
-import type { AnyExtension, Editor } from '@tiptap/core'
-import { EditorContent, type Editor as VueEditor } from '@tiptap/vue-3'
+import type { AnyExtension } from '@tiptap/core'
+import { Editor, EditorContent } from '@tiptap/vue-3'
 import type { ComarkTree, JSONContent } from 'tiptap-comark'
 import { useComarkEditor, type UseComarkEditorOptions } from './use-comark-editor'
 import type { ComarkVueComponentExports } from './define-component'
@@ -193,15 +200,7 @@ watch(
   },
 )
 
-const editorRef = computed<Editor | undefined>(
-  () => props.editor ?? (internal?.editor.value as Editor | undefined),
-)
-// `EditorContent`'s prop is typed against `@tiptap/vue-3`'s Editor (a
-// structural superset of core's). Same instance at runtime; just a type-
-// level coercion so the template binds cleanly.
-const editorForView = computed<VueEditor | undefined>(
-  () => editorRef.value as VueEditor | undefined,
-)
+const editorRef = computed<Editor | undefined>(() => props.editor ?? internal?.editor.value)
 const isReady = computed(() => editorRef.value !== undefined)
 
 defineExpose({
@@ -221,8 +220,8 @@ defineExpose({
   <div data-comark-editor>
     <slot :editor="editorRef" :is-ready="isReady" />
     <EditorContent
-      v-if="editorForView"
-      :editor="editorForView"
+      v-if="editorRef"
+      :editor="editorRef"
       data-comark-editor-content
       v-bind="$attrs"
     />

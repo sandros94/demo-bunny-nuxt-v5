@@ -9,7 +9,6 @@
  *      `::alert` / `:badge` style components.
  */
 
-// @ts-ignore
 export { default as ComarkEditor } from './ComarkEditor.vue'
 
 export {
@@ -26,6 +25,13 @@ export {
   type ComarkVueComponentDefinition,
   type ComarkVueComponentExports,
 } from './define-component'
+
+// Re-export the vue-3 `Editor` class so consumers building their own
+// editor outside `useComarkEditor` (the bring-your-own-editor mode of
+// `<ComarkEditor>`) don't have to add a direct dependency on
+// `@tiptap/vue-3` just to get the right type. Anything else from
+// `@tiptap/vue-3` still imports cleanly from there.
+export { Editor } from '@tiptap/vue-3'
 
 // Re-export the types most users will need from `tiptap-comark` so they
 // don't have to import from two packages for a basic setup. `ComarkComment`

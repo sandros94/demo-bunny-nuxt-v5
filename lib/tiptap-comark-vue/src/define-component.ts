@@ -11,13 +11,11 @@
  * This file is what makes `nodeView: AlertNodeView` actually mount.
  */
 
-import { Node, type Node as TiptapNode } from '@tiptap/core'
 import { VueNodeViewRenderer } from '@tiptap/vue-3'
 import {
   defineComarkComponent,
   type ComarkComponentDefinition,
   type ComarkComponentExports,
-  type NodeSpec,
 } from 'tiptap-comark'
 import type { Component } from 'vue'
 
@@ -46,14 +44,14 @@ export function defineComarkVueComponent(
   if (!def.nodeView) return base
 
   const nodeView = def.nodeView
-  // `.extend()` widens the storage type generic; the underlying instance
-  // still carries the `comark` storage entry produced by the base spec, so
-  // narrow back here for the public type.
-  const extension = (base.extension as ReturnType<typeof Node.create>).extend({
+  // `.extend()` only adds an `addNodeView` config; the storage type from
+  // `base.extension` (which already carries `{ comark: NodeSpec }`) is
+  // preserved through the call, so no cast is needed.
+  const extension = base.extension.extend({
     addNodeView() {
       return VueNodeViewRenderer(nodeView)
     },
-  }) as TiptapNode<unknown, { comark: NodeSpec }>
+  })
 
   return { ...base, extension }
 }
