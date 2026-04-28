@@ -46,11 +46,21 @@ export {
   comarkToPmDoc,
   createSerializer,
   pmDocToComark,
+  type ComarkSerializerOptions,
   type ComarkSerializerStorage,
   type SerializerSpecs,
 } from './serializer'
-export { attrsEqual, cleanAttrs, mergeAttrs, splitAttrs } from './utils/attrs'
+export { attrsEqual, cleanAttrs, hasNoHtmlAttrs, mergeAttrs, splitAttrs } from './utils/attrs'
 export { htmlAttrSpec, type HtmlAttrSpecOptions } from './utils/html-attrs'
+
+// ---------------------------------------------------------------------------
+// Operational stylesheet — auto-injected by `ComarkSerializer` unless
+// disabled via `ComarkSerializer.configure({ injectStyles: false })`.
+// Re-exported here so consumers shipping their own stylesheet pipeline
+// (CSP-nonce'd injection, Shadow DOM, build-step bundling) can pull
+// the same payload.
+// ---------------------------------------------------------------------------
+export { COMARK_STYLE_MARKER, comarkStyle, injectComarkStyles } from './style'
 
 // ---------------------------------------------------------------------------
 // Kit + per-extension exports

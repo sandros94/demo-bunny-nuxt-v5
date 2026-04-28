@@ -18,6 +18,7 @@
 import { Extension, type AnyExtension, type Editor, type JSONContent } from '@tiptap/core'
 import { parse } from 'comark'
 import { renderMarkdown } from 'comark/render'
+import { injectComarkStyles } from './style'
 import type {
   ComarkComment,
   ComarkElement,
@@ -350,8 +351,41 @@ export interface ComarkSerializerStorage {
   getMarkdown(): Promise<string>
 }
 
-export const ComarkSerializer = Extension.create({
+export interface ComarkSerializerOptions {
+  /**
+   * Auto-inject the kit's operational stylesheet (`comarkStyle`) into
+   * `document.head` on editor creation. Mirrors `@tiptap/core`'s own
+   * `injectCSS` option both in name shape and in dedup behavior — a
+   * single `<style data-comark-style>` tag is shared across every
+   * editor in the document.
+   *
+   * Set to `false` if a host (e.g. Nuxt UI) ships its own complete
+   * stylesheet for the kit's markers, or if the consumer wants to
+   * inject `comarkStyle` themselves with a CSP nonce / Shadow DOM /
+   * scoped pipeline.
+   *
+   * @default true
+   */
+  injectStyles: boolean
+
+  /**
+   * CSP nonce applied to the auto-injected style tag. Mirrors Tiptap
+   * core's `injectNonce`. Ignored when `injectStyles` is `false`.
+   *
+   * @default undefined
+   */
+  injectNonce?: string
+}
+
+export const ComarkSerializer = Extension.create<ComarkSerializerOptions, ComarkSerializerStorage>({
   name: 'comark',
+
+  addOptions() {
+    return {
+      injectStyles: true,
+      injectNonce: undefined,
+    }
+  },
 
   addStorage(): ComarkSerializerStorage {
     return {
@@ -379,6 +413,14 @@ export const ComarkSerializer = Extension.create({
     // fired from a host's `onCreate` callback dispatches a transaction
     // before our extension's own `onCreate` would run, so we set up here.
     this.storage.editor = this.editor
+
+    // Inject the operational stylesheet at the same point Tiptap core
+    // injects its own (during construction, before any transaction).
+    // `injectComarkStyles` is a no-op when `document` is undefined, so
+    // this is safe in SSR / Node test runners.
+    if (this.options.injectStyles) {
+      injectComarkStyles(this.options.injectNonce)
+    }
   },
 
   addCommands() {
