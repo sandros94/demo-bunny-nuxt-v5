@@ -17,7 +17,11 @@
 <script setup lang="ts">
 import { onMounted, watch } from 'vue'
 import { parse } from 'comark'
-import { ComarkEditor, defineComarkVueComponent, type ComarkTree } from 'tiptap-comark-vue'
+// `UComarkEditor` is a project-internal Nuxt UI integration over
+// `<ComarkEditor>` (see `~/components/UComarkEditor.vue`). It applies
+// Nuxt UI's editor theme entry — same one `<UEditor>` itself uses —
+// to give us prose styling without `@tailwindcss/typography`.
+import { defineComarkVueComponent, type ComarkTree } from 'tiptap-comark-vue'
 import AlertNodeView from '~/components/AlertNodeView.vue'
 
 const STORAGE_KEY = 'comark-demo-doc'
@@ -149,10 +153,10 @@ async function resetToSeed() {
     </header>
 
     <ClientOnly>
-      <ComarkEditor
+      <UComarkEditor
         v-model:ast="tree"
         :components="components"
-        class="prose dark:prose-invert max-w-none rounded-lg border border-default p-4 min-h-100 focus:outline-none"
+        class="rounded-lg border border-default p-4 min-h-100 focus:outline-none"
         data-test="editor"
       />
       <template #fallback>
