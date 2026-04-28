@@ -120,13 +120,21 @@ export function createSerializer(specs: SerializerSpecs): ComarkHelpers {
     for (const child of content) {
       if (!child.type) continue
 
-      // Text gets wrapped by its marks, innermost first.
+      // Text gets wrapped by its marks. PM stores marks outer-first
+      // (matches `DOMParser.fromSchema(...).parse()`'s convention; the
+      // mark at index 0 is the outermost in the source DOM). To produce
+      // `<strong><em>X</em></strong>` we must wrap with the LAST mark
+      // first (innermost) and the FIRST mark last (outermost), hence the
+      // reverse iteration. `parseInlines` prepends new marks for the
+      // same reason — both directions agree on outer-first.
       if (child.type === TEXT_PM_NAME) {
         const text = child.text ?? ''
         if (text.length === 0) continue
         const marks = (child.marks ?? []) as PMMark[]
         let inner: ComarkNode = text
-        for (const m of marks) {
+        for (let i = marks.length - 1; i >= 0; i--) {
+          const m = marks[i]
+          if (!m) continue
           const spec = markByPmName.get(m.type)
           if (!spec) continue
           inner = spec.toComark(m, inner)
@@ -136,13 +144,17 @@ export function createSerializer(specs: SerializerSpecs): ComarkHelpers {
       }
 
       // Inline atom (image, hardBreak, inline component) — the spec emits
-      // its own Comark element. Marks on inline atoms wrap that element.
+      // its own Comark element. Marks on inline atoms wrap that element
+      // outer-first, same convention as text-run marks.
       const spec = nodeByPmName.get(child.type)
       if (!spec) continue
       const result = spec.toComark(child, helpers)
       if (result === null || result === undefined) continue
       let wrapped: ComarkNode = result
-      for (const m of (child.marks ?? []) as PMMark[]) {
+      const atomMarks = (child.marks ?? []) as PMMark[]
+      for (let i = atomMarks.length - 1; i >= 0; i--) {
+        const m = atomMarks[i]
+        if (!m) continue
         const ms = markByPmName.get(m.type)
         if (!ms) continue
         wrapped = ms.toComark(m, wrapped)
@@ -230,9 +242,12 @@ export function createSerializer(specs: SerializerSpecs): ComarkHelpers {
         const innerChildren = child.slice(2) as ComarkNode[]
         const innerJson = parseInlines(innerChildren)
         for (const j of innerJson) {
-          // Layer the mark over whatever this inline already had.
+          // Prepend the new mark — at this point it's the OUTERMOST one
+          // we've seen for this text run (we're unwinding the recursion
+          // from the inside out). Outer-first ordering matches PM's
+          // DOM-parser convention; `serializeInlines` wraps in reverse.
           const existing = (j.marks ?? []) as PMMark[]
-          out.push({ ...j, marks: [...existing, mark] })
+          out.push({ ...j, marks: [mark, ...existing] })
         }
         continue
       }

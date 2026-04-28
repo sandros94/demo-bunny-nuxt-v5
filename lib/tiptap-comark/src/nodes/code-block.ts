@@ -133,16 +133,52 @@ export const ComarkCodeBlock = Node.create({
   },
 
   parseHTML() {
-    return [{ tag: 'pre' }]
+    return [
+      {
+        tag: 'pre',
+        // Capture extra attrs on the inner `<code>` (e.g. `data-line-numbers`)
+        // so they survive a DOM round-trip. We deliberately drop the
+        // `language-{lang}` class because it duplicates `node.attrs.language`
+        // and is recomputed on render. We also skip kit-internal `data-comark-*`
+        // markers and PM's own `data-pm-*` bookkeeping.
+        getAttrs(el) {
+          if (!(el instanceof HTMLElement)) return false
+          const code = el.querySelector('code')
+          if (!code) return null
+          const inferredLang = (() => {
+            const cls = code.getAttribute('class') ?? ''
+            const m = /language-(\S+)/.exec(cls)
+            return m ? m[1] : null
+          })()
+          const out: Record<string, string> = {}
+          for (const attr of Array.from(code.attributes)) {
+            if (attr.name === 'class' && inferredLang && attr.value === `language-${inferredLang}`)
+              continue
+            if (attr.name.startsWith('data-pm-')) continue
+            if (attr.name.startsWith('data-comark-')) continue
+            out[attr.name] = attr.value
+          }
+          return Object.keys(out).length > 0 ? { codeHtmlAttrs: out } : null
+        },
+      },
+    ]
   },
 
   renderHTML({ node, HTMLAttributes }) {
     const lang = node.attrs.language as string | null | undefined
-    return [
-      'pre',
-      mergeAttributes(HTMLAttributes),
-      ['code', lang ? { class: `language-${lang}` } : {}, 0],
-    ]
+    const extra = (node.attrs.codeHtmlAttrs as Record<string, unknown> | null | undefined) ?? null
+    const codeAttrs: Record<string, unknown> = {}
+    if (extra) {
+      for (const [k, v] of Object.entries(extra)) {
+        if (v === null || v === undefined) continue
+        if (typeof v === 'string') codeAttrs[k] = v
+        else if (typeof v === 'number' || typeof v === 'boolean' || typeof v === 'bigint') {
+          codeAttrs[k] = String(v)
+        }
+      }
+    }
+    if (lang) codeAttrs.class = `language-${lang}`
+    return ['pre', mergeAttributes(HTMLAttributes), ['code', codeAttrs, 0]]
   },
 
   addStorage() {

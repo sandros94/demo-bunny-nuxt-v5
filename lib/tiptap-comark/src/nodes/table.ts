@@ -19,7 +19,7 @@
  */
 
 import { Node, mergeAttributes } from '@tiptap/core'
-import { mergeAttrs, splitAttrs } from '../utils/attrs'
+import { hasNoHtmlAttrs, mergeAttrs, splitAttrs } from '../utils/attrs'
 import { htmlAttrSpec } from '../utils/html-attrs'
 import type { ComarkElement, ComarkHelpers, ComarkNode, JSONContent, NodeSpec } from '../types'
 
@@ -183,12 +183,10 @@ function makeCellSpec(pmName: 'tableHeader' | 'tableCell', tag: 'th' | 'td'): No
 
       // If the cell holds a single attrless paragraph, inline its children
       // (canonical markdown table-cell shape). Otherwise serialize blocks.
+      // `hasNoHtmlAttrs` keeps DOM-roundtripped cells (which carry the
+      // PM-default `htmlAttrs: {}`) on the flatten branch.
       const content = node.content ?? []
-      if (
-        content.length === 1 &&
-        content[0]?.type === 'paragraph' &&
-        !content[0]?.attrs?.htmlAttrs
-      ) {
+      if (content.length === 1 && content[0]?.type === 'paragraph' && hasNoHtmlAttrs(content[0])) {
         return [tag, attrs, ...h.serializeInlines(content[0]?.content)]
       }
       return [tag, attrs, ...h.serializeBlocks(content)]

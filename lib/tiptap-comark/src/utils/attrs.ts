@@ -82,6 +82,26 @@ export function mergeAttrs(
 }
 
 /**
+ * Is the node's `htmlAttrs` bag effectively empty? Two states get
+ * collapsed: the bag is missing entirely (a fresh AST built via
+ * `fromComark` doesn't add `htmlAttrs` when there's nothing to put in
+ * it), and the bag is `{}` (PM's parseHTML default — Tiptap fills the
+ * default whenever `parseHTML` returns `null`, so any DOM round-trip
+ * leaves `htmlAttrs: {}` even for an attrless element). Code that needs
+ * to ask "does this paragraph have any HTML attrs?" must treat both as
+ * the same.
+ */
+export function hasNoHtmlAttrs(
+  node: { attrs?: { htmlAttrs?: unknown } } | null | undefined,
+): boolean {
+  if (!node) return true
+  const html = node.attrs?.htmlAttrs as Record<string, unknown> | null | undefined
+  if (!html) return true
+  if (typeof html !== 'object') return true
+  return Object.keys(html).length === 0
+}
+
+/**
  * Are two `htmlAttrs` Records value-equal? PM compares mark attrs
  * structurally, but adjacent marks with `{ class: 'a' }` and
  * `{ class: 'a', id: undefined }` would otherwise be considered distinct

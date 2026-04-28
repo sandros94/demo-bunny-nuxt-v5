@@ -12,7 +12,7 @@
  */
 
 import { Node, mergeAttributes } from '@tiptap/core'
-import { mergeAttrs, splitAttrs } from '../utils/attrs'
+import { hasNoHtmlAttrs, mergeAttrs, splitAttrs } from '../utils/attrs'
 import { htmlAttrSpec } from '../utils/html-attrs'
 import type { ComarkElement, ComarkHelpers, JSONContent, NodeSpec } from '../types'
 
@@ -32,7 +32,10 @@ export const listItemSpec: NodeSpec = {
 
     const content = node.content ?? []
     const first = content[0]
-    const firstIsAttrlessParagraph = first?.type === 'paragraph' && !first.attrs?.htmlAttrs
+    // Note: `hasNoHtmlAttrs` collapses missing-vs-`{}` bags so a paragraph
+    // round-tripped through DOM (where PM fills the default `{}`) is still
+    // recognised as "attrless" and gets flattened to the tight form.
+    const firstIsAttrlessParagraph = first?.type === 'paragraph' && hasNoHtmlAttrs(first)
 
     // Single attrless paragraph → flatten fully. Matches the canonical
     // tight item form `['li',{},'one']`.

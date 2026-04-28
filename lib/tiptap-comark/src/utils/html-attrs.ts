@@ -20,14 +20,25 @@
 import type { Attributes } from '@tiptap/core'
 
 /**
- * Internal DOM attributes that PM/Tiptap manages itself. Never round-tripped
- * to Comark.
+ * Internal DOM attributes that PM/Tiptap manages itself, and namespace
+ * prefixes the kit uses for its own discriminator/payload attributes.
+ *
+ * `data-comark-` is reserved for the kit's own use (`data-comark-comment`,
+ * `data-comark-template`, `data-comark-component`, …): these attributes
+ * carry payload or act as parseHTML matchers, and harvesting them into
+ * `htmlAttrs` would (a) duplicate the value into a field that re-renders
+ * separately and (b) "leak" the marker into the AST on round-trip.
+ *
+ * If a downstream user genuinely wants to attach a `data-comark-foo` of
+ * their own, they should pick a different prefix — the namespace is the
+ * kit's contract.
  */
 const PM_INTERNAL_ATTR_PREFIXES = [
   'data-pm-',
   'data-prosemirror-',
   'pm-',
   'data-node-view-',
+  'data-comark-',
 ] as const
 
 const PM_INTERNAL_ATTR_NAMES = new Set(['contenteditable', 'draggable', 'spellcheck'])
